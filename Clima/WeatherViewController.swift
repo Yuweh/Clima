@@ -8,28 +8,29 @@
 
 import UIKit
 import CoreLocation
+
+//installed thru cocoapods
 import Alamofire
 import SwiftyJSON
 
 class WeatherViewController: UIViewController , CLLocationManagerDelegate, ChangeCityDelegate {
     
-    //Constants
-    let WEATHER_URL = "http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=5908fc0588996d23cb05c3560bdbf07e"
-    //http://api.openweathermap.org/data/2.5/weather
-    let APP_ID = "5908fc0588996d23cb05c3560bdbf07e"
+    //Constants from OpenWeather and Weather URL and APP ID are req
+    let WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather"
+    let APP_ID = "e72ca729af228beabd5d20e3b7749713"
     
-    //"e72ca729af228beabd5d20e3b7749713"
-  
-    
-
+    /* Own Account
+    URL: http://api.openweathermap.org/data/2.5/forecast?id=524901&APPID=5908fc0588996d23cb05c3560bdbf07e
+    ID: 5908fc0588996d23cb05c3560bdbf07e */
     
 
     //TODO: Declare instance variables here
     let locationManager = CLLocationManager()
     let weatherDataModel = WeatherDataModel()
+    /*Declared instance variables to let the VC act as delegate for the CLLocationManager connected w/ CoreLocation and WeatherDataModel */
 
     
-    //Pre-linked IBOutlets
+    //Pre-linked IBOutlets (DEFAULT)
     @IBOutlet weak var weatherIcon: UIImageView!
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
@@ -38,25 +39,20 @@ class WeatherViewController: UIViewController , CLLocationManagerDelegate, Chang
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         //TODO:Set up the location manager here.
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
         
-        
-        
     }
-    
-    
     
     //MARK: - Networking
     /***************************************************************/
     
-    //Write the getWeatherData method here:
+    //Write the getWeatherData method here: (APIs: URL, APP_ID, ETC)
+    
     func getWeatherData(url: String, parameters: [String: String]) {
-        
         Alamofire.request(url, method: .get, parameters: parameters).responseJSON {
             response in
             if response.result.isSuccess {
@@ -67,15 +63,12 @@ class WeatherViewController: UIViewController , CLLocationManagerDelegate, Chang
                 print(weatherJSON)
             }
             else {
-                print("Erroe \(response.result.error)")
+                print("Error \(response.result.error)")
                 self.cityLabel.text = "Connection Issues"
             }
         }
     }
 
-    
-    
-    
     
     
     //MARK: - JSON Parsing
@@ -111,7 +104,7 @@ class WeatherViewController: UIViewController , CLLocationManagerDelegate, Chang
     
     func updateUIWithWeatherData() {
         cityLabel.text = weatherDataModel.city
-        temperatureLabel.text = "\(weatherDataModel.temperature)"
+        temperatureLabel.text = "\(weatherDataModel.temperature)°"
         weatherIcon.image = UIImage(named: weatherDataModel.weatherIconName)
     }
     
@@ -136,7 +129,7 @@ class WeatherViewController: UIViewController , CLLocationManagerDelegate, Chang
             let latitude = String(location.coordinate.latitude)
             let longitude = String(location.coordinate.longitude)
             
-            let params : [String : String] = ["late" : latitude, "lon" : longitude, "appid" : APP_ID]
+            let params : [String : String] = ["lat" : latitude, "lon" : longitude, "appid" : APP_ID]
         
             getWeatherData(url: WEATHER_URL, parameters: params)
         }
@@ -157,9 +150,11 @@ class WeatherViewController: UIViewController , CLLocationManagerDelegate, Chang
     
     
     //Write the userEnteredANewCityName Delegate method here:
-    
     func userEnteredANewCityName(city: String) {
         print(city)
+        let params : [String: String] = ["q" : city, "appid" : APP_ID]
+         getWeatherData(url: WEATHER_URL, parameters: params)
+        
     }
 
     
